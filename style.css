@@ -799,3 +799,288 @@ main {
 
 /* ─── Utility ────────────────────────────────────────────────── */
 .hidden { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   MODE TOGGLE  (ANALYZE ↔ COMPARE slider)
+   ══════════════════════════════════════════════════════════════ */
+
+.mode-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 0.3rem 0.7rem 0.3rem 0.4rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  font-family: var(--font-ui);
+  user-select: none;
+}
+.mode-toggle:hover:not(.toggle-disabled) {
+  border-color: var(--accent2);
+  background: var(--bg2);
+}
+.mode-toggle.toggle-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The sliding pill track */
+.toggle-track {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  background: var(--border);
+  border-radius: 99px;
+  transition: background 0.25s;
+  flex-shrink: 0;
+}
+.mode-toggle.toggle-active .toggle-track {
+  background: var(--accent2);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
+}
+.mode-toggle.toggle-active .toggle-thumb {
+  transform: translateX(12px);
+  background: #fff;
+}
+
+.toggle-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  transition: color 0.2s;
+}
+.toggle-label-current {
+  color: var(--text);
+}
+.mode-toggle.toggle-active .toggle-label-compare {
+  color: var(--accent2);
+}
+
+.toggle-plugin-name {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  font-style: italic;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Compare status bar ─────────────────────────────────────── */
+.compare-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  margin-bottom: 0.5rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  color: var(--text-mid);
+}
+.compare-status-icon {
+  color: var(--accent2);
+  animation: spin-icon 1.2s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+/* Stop spinning once not loading — toggled via JS class */
+.compare-status-bar.done .compare-status-icon { animation: none; }
+
+@keyframes spin-icon { to { transform: rotate(360deg); } }
+
+.compare-status { flex: 1; }
+.compare-status-error { color: var(--warn) !important; }
+
+/* ── Compare upload overlay ──────────────────────────────────── */
+/*
+ * Sits between the status bar and the results grid.
+ * When visible it covers/replaces the grid visually by being
+ * a tall centred card — the grid is still rendered underneath
+ * but dimmed and non-interactive.
+ */
+.compare-upload-section {
+  position: relative;
+  z-index: 10;
+  margin-bottom: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg2);
+  /* Dim the grid below without hiding it */
+}
+
+/* When the overlay is showing, dim the grid underneath */
+#results-section:has(.compare-upload-section:not(.hidden)) .results-layout {
+  opacity: 0.25;
+  pointer-events: none;
+  user-select: none;
+}
+
+.compare-upload-inner {
+  padding: 1.6rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.compare-upload-heading {
+  font-size: 0.9rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+.compare-upload-heading strong { color: var(--accent2); }
+.compare-upload-heading code {
+  color: var(--accent);
+  background: rgba(0,229,160,0.08);
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+  font-size: 0.85em;
+}
+.compare-upload-icon {
+  font-size: 1.1rem;
+  color: var(--accent2);
+  animation: spin-hex 8s linear infinite;
+  display: inline-block;
+}
+
+.compare-upload-sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 420px;
+}
+
+/* The inner drop zone inside the overlay — slightly smaller */
+.compare-drop-zone {
+  padding: 2rem 4rem;
+  width: 100%;
+  max-width: 480px;
+}
+.compare-drop-icon {
+  font-size: 2rem;
+  color: var(--text-dim);
+  margin-bottom: 0.8rem;
+  transition: color 0.2s;
+  animation: spin-hex 12s linear infinite;
+  display: inline-block;
+}
+.compare-drop-zone:hover .compare-drop-icon,
+.compare-drop-zone.drag-over .compare-drop-icon {
+  color: var(--accent2);
+}
+.compare-drop-zone:hover,
+.compare-drop-zone.drag-over {
+  border-color: var(--accent2);
+  background: rgba(0,179,255,0.04);
+}
+
+/* ── data-mode attribute on results-section ─────────────────── */
+/* Show "DIFF" label in call panel header when in compare mode */
+#results-section[data-mode="compare"] #call-pane-label::after {
+  content: ' — DIFF';
+  color: var(--accent2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DIFF VIEW  — colour-coded diff items
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  --diff-added:    rgba(0, 229, 120, 0.12);
+  --diff-removed:  rgba(255, 68,  68, 0.12);
+  --diff-modified: rgba(232,184, 109, 0.10);
+
+  --diff-added-border:    #00e578;
+  --diff-removed-border:  #ff4444;
+  --diff-modified-border: #e8b86d;
+}
+
+/* Class / method items */
+.diff-item.diff-added    { background: var(--diff-added);    border-left: 2px solid var(--diff-added-border) !important; padding-left: calc(0.9rem - 2px) !important; }
+.diff-item.diff-removed  { background: var(--diff-removed);  border-left: 2px solid var(--diff-removed-border) !important; padding-left: calc(0.9rem - 2px) !important; }
+.diff-item.diff-modified { background: var(--diff-modified); border-left: 2px solid var(--diff-modified-border) !important; padding-left: calc(0.9rem - 2px) !important; }
+
+/* Active state overrides */
+.diff-item.diff-added.active    { background: rgba(0,229,120,0.22) !important; }
+.diff-item.diff-removed.active  { background: rgba(255,68,68,0.22) !important; }
+.diff-item.diff-modified.active { background: rgba(232,184,109,0.20) !important; }
+
+/* Diff icons (the +/−/~ prefix) */
+.diff-icon { font-weight: 700; margin-right: 0.2rem; flex-shrink: 0; font-size: 0.8rem; }
+.diff-icon-added    { color: var(--diff-added-border); }
+.diff-icon-removed  { color: var(--diff-removed-border); }
+.diff-icon-modified { color: var(--diff-modified-border); }
+.diff-icon-unchanged { color: var(--text-dim); }
+
+/* Call diff items */
+.diff-call-added    { background: var(--diff-added); }
+.diff-call-removed  { background: var(--diff-removed); opacity: 0.8; }
+.diff-call-unchanged { opacity: 0.45; }
+
+/* Field diff items */
+.diff-field-added   { background: var(--diff-added); }
+.diff-field-removed { background: var(--diff-removed); }
+
+/* Call panel sig colour in diff mode */
+.call-panel-sig.diff-sig-added    { color: var(--diff-added-border); }
+.call-panel-sig.diff-sig-removed  { color: var(--diff-removed-border); }
+.call-panel-sig.diff-sig-modified { color: var(--diff-modified-border); }
+
+/* ── INFO severity in detection panel ──────────────────────── */
+:root { --sev-info: #6ab0de; }
+.sev-info { color: var(--sev-info); }
+.det-group-info { border-left: 2px solid var(--sev-info); padding-left: calc(1.1rem - 2px); }
+.verdict-info   { color: var(--sev-info); background: rgba(106,176,222,0.12); border: 1px solid rgba(106,176,222,0.25); }
+
+/* ── Mobile adjustments ─────────────────────────────────────── */
+@media (max-width: 767px) {
+  .mode-toggle-wrap { display: none; } /* show below header on mobile */
+
+  .compare-status-bar {
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+
+  .compare-upload-section {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin-bottom: 0;
+  }
+
+  .compare-upload-inner {
+    padding: 1.2rem 1rem;
+  }
+
+  .compare-drop-zone {
+    padding: 1.5rem 1.2rem;
+    max-width: 100%;
+  }
+}

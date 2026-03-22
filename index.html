@@ -19,7 +19,19 @@
       <p class="tagline">an experimental Minecraft malware analysis tool</p>
     </div>
 
-    <!-- Mobile breadcrumb + back button (hidden on desktop) -->
+    <!-- Mode toggle (revealed after primary JAR is loaded) -->
+    <div class="mode-toggle-wrap hidden" id="mode-toggle-wrap">
+      <button class="mode-toggle" id="mode-toggle" data-mode="analyze" data-disabled="true" aria-label="Toggle comparison mode">
+        <span class="toggle-track">
+          <span class="toggle-thumb"></span>
+        </span>
+        <span class="toggle-label toggle-label-analyze toggle-label-current">ANALYZE</span>
+        <span class="toggle-label toggle-label-compare">COMPARE</span>
+      </button>
+      <span class="toggle-plugin-name hidden" id="toggle-plugin-name"></span>
+    </div>
+
+    <!-- Mobile breadcrumb + back button -->
     <nav class="mobile-nav hidden" id="mobile-nav">
       <button class="btn-back hidden" id="btn-back" aria-label="Go back">&#8592;</button>
       <div class="breadcrumb">
@@ -34,7 +46,7 @@
 
   <main>
 
-    <!-- Upload -->
+    <!-- ── Primary JAR upload ───────────────────────────────────── -->
     <section id="upload-section">
       <div class="drop-zone" id="drop-zone">
         <div class="drop-icon">⬡</div>
@@ -45,7 +57,7 @@
       </div>
     </section>
 
-    <!-- Progress -->
+    <!-- ── Progress bar ─────────────────────────────────────────── -->
     <section id="progress-section" class="hidden">
       <div class="progress-bar-wrap">
         <div class="progress-bar" id="progress-bar"></div>
@@ -53,8 +65,38 @@
       <p class="progress-label" id="progress-label">Loading…</p>
     </section>
 
-    <!-- Analysis grid (3 columns) -->
-    <section id="results-section" class="hidden">
+    <!-- ── Analysis / Diff grid ─────────────────────────────────── -->
+    <section id="results-section" class="hidden" data-mode="analyze">
+
+      <!-- Compare status bar: shown while processing / after comparison -->
+      <div class="compare-status-bar hidden" id="compare-status-bar">
+        <span class="compare-status-icon">⟳</span>
+        <span id="compare-status" class="compare-status"></span>
+      </div>
+
+      <!-- ── Reference JAR upload overlay ─────────────────────────
+           Shown when the user flips to COMPARE mode and no reference
+           JAR has been loaded yet. Sits on top of the analysis grid.
+      ─────────────────────────────────────────────────────────────-->
+      <div class="compare-upload-section hidden" id="compare-upload-section">
+        <div class="compare-upload-inner">
+          <p class="compare-upload-heading">
+            <span class="compare-upload-icon">⬡</span>
+            Upload the <strong>reference</strong> (official) <code>.jar</code>
+          </p>
+          <p class="compare-upload-sub">
+            Drop the clean SpigotMC build here to diff it against your uploaded plugin.
+          </p>
+          <div class="drop-zone compare-drop-zone" id="compare-drop-zone">
+            <div class="drop-icon compare-drop-icon">⬡</div>
+            <p class="drop-primary">drop reference <code>.jar</code> here</p>
+            <p class="drop-secondary">or</p>
+            <label class="file-btn" for="compare-jar-input">browse files</label>
+            <input type="file" id="compare-jar-input" accept=".jar" hidden />
+          </div>
+        </div>
+      </div>
+
       <div class="results-layout" data-panel="classes">
 
         <!-- Column 1: class list -->
@@ -88,7 +130,7 @@
 
         <!-- Column 3: call sites -->
         <div id="call-panel-wrap" data-col="calls">
-          <div class="pane-label">CALL SITES</div>
+          <div class="pane-label" id="call-pane-label">CALL SITES</div>
           <div id="call-panel">
             <div class="call-panel-empty">← select a method</div>
           </div>
@@ -97,10 +139,9 @@
       </div>
     </section>
 
-    <!-- Detections panel — shown below the grid after scan -->
+    <!-- ── Detections panel ──────────────────────────────────────── -->
     <section id="detections-section" class="hidden">
       <div class="det-panel">
-
         <div class="det-header">
           <div class="det-header-left">
             <span class="det-title">SCAN RESULTS</span>
@@ -108,9 +149,7 @@
           </div>
           <span id="detection-badge" class="detection-verdict verdict-clean">CLEAN</span>
         </div>
-
         <ul id="detection-list" class="det-list"></ul>
-
       </div>
     </section>
 
