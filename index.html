@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCANCRAFT — Minecraft Malware Analysis</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="scanline"></div>
+
+  <header>
+    <div class="header-main">
+      <div class="logo">
+        <span class="logo-bracket">[</span>SCAN<span class="logo-accent">CRAFT</span><span class="logo-bracket">]</span>
+      </div>
+      <p class="tagline">an experimental Minecraft malware analysis tool</p>
+    </div>
+
+    <!-- Mobile breadcrumb + back button (hidden on desktop) -->
+    <nav class="mobile-nav hidden" id="mobile-nav">
+      <button class="btn-back hidden" id="btn-back" aria-label="Go back">&#8592;</button>
+      <div class="breadcrumb">
+        <span class="crumb-root">classes</span>
+        <span class="crumb-sep hidden" id="crumb-class-sep">›</span>
+        <span class="crumb-seg hidden" id="crumb-class"></span>
+        <span class="crumb-sep hidden" id="crumb-method-sep">›</span>
+        <span class="crumb-seg hidden" id="crumb-method"></span>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- Upload -->
+    <section id="upload-section">
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-icon">⬡</div>
+        <p class="drop-primary">drop a <code>.jar</code> file here</p>
+        <p class="drop-secondary">or</p>
+        <label class="file-btn" for="jar-input">browse files</label>
+        <input type="file" id="jar-input" accept=".jar" hidden />
+      </div>
+    </section>
+
+    <!-- Progress -->
+    <section id="progress-section" class="hidden">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <p class="progress-label" id="progress-label">Loading…</p>
+    </section>
+
+    <!-- Analysis grid (3 columns) -->
+    <section id="results-section" class="hidden">
+      <div class="results-layout" data-panel="classes">
+
+        <!-- Column 1: class list -->
+        <aside id="file-tree" data-col="classes">
+          <div class="tree-header">
+            <span id="file-count-label">0 classes</span>
+            <input type="text" id="search-input" placeholder="filter classes…" />
+          </div>
+          <ul id="tree-list"></ul>
+        </aside>
+
+        <!-- Column 2: methods + fields -->
+        <aside id="member-tree" data-col="members">
+          <div class="tree-header">
+            <div class="class-label-wrap">
+              <span class="pane-sublabel">CLASS</span>
+              <span id="class-label" title="">—</span>
+            </div>
+            <span id="method-count-label">0 methods</span>
+          </div>
+          <ul id="method-list"></ul>
+
+          <div class="field-section">
+            <div class="field-section-header">
+              <span class="pane-sublabel">FIELDS</span>
+              <span id="field-count-label"></span>
+            </div>
+            <ul id="field-list"></ul>
+          </div>
+        </aside>
+
+        <!-- Column 3: call sites -->
+        <div id="call-panel-wrap" data-col="calls">
+          <div class="pane-label">CALL SITES</div>
+          <div id="call-panel">
+            <div class="call-panel-empty">← select a method</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Detections panel — shown below the grid after scan -->
+    <section id="detections-section" class="hidden">
+      <div class="det-panel">
+
+        <div class="det-header">
+          <div class="det-header-left">
+            <span class="det-title">SCAN RESULTS</span>
+            <span id="detection-count" class="det-total"></span>
+          </div>
+          <span id="detection-badge" class="detection-verdict verdict-clean">CLEAN</span>
+        </div>
+
+        <ul id="detection-list" class="det-list"></ul>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
