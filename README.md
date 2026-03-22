@@ -1,2 +1,3 @@
-# pluginscan
-an experimental Minecraft plugin malware analysis tool
+# Pluginscan
+
+An experimental Minecraft plugin malware analysis tool
